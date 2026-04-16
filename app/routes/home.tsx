@@ -31,7 +31,7 @@ export default function Home() {
     alert("Failed to save project. Please try again.");
     return false;
    }
-   setProjects([newItem,...projects]);
+   setProjects([saved,...projects]);
    navigate(`/visualizer/${newId}`,{
     state: {
       initialImage:saved.sourceImage,

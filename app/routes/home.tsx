@@ -1,4 +1,4 @@
-import { ArrowRight, Layers } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Clock, Layers } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import type { Route } from "./+types/home";
 import Button from "../../components/Button";
@@ -56,7 +56,25 @@ export default function Home() {
         </div>
         <div className="projects-grid">
           <div className="project-card group">
-            <div className="preview"></div>
+            <div className="preview">
+              <img src="https://roomify-mlhuk267-dfwu1i.puter.site/projects/1770803585402/rendered.png" alt="project" />
+              <div className="badge">
+                <span>Community</span>
+              </div>
+            </div>
+            <div className="card-body">
+              <div>
+                <h3>Project Manhattan</h3>
+                <div className="meta">
+                  <Clock size={12}/>
+                  <span>{new Date().toLocaleDateString()}</span>
+                  <span>By Joash</span>
+                </div>
+              </div>
+              <div className="arrow">
+                <ArrowUpRight size={18}/>
+              </div>
+            </div>
           </div>
         </div>
       </div>

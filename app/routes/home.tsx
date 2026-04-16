@@ -1,5 +1,6 @@
+import Navbar from "../../components/Navbar";
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,5 +10,9 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  return <Welcome />;
+  return (<div className="home">
+    <Navbar />
+    
+    
+    <h1 className="text-2xl font-bold">Welcome to the Home Page</h1></div>);
 }

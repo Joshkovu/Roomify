@@ -48,7 +48,7 @@ export default function Home() {
             <Layers className="icon"/>
           </div>
           <h3>Upload your floor plan</h3>
-          <p>Supports JPG, PNG, formats upto 10MBs</p>
+          <p>Supports JPG, PNG, formats upto 50MBs</p>
         </div>
           <Upload onComplete={handleUploadComplete} />
       </div>

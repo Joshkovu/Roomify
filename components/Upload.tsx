@@ -2,6 +2,8 @@ import { CheckCircle2, UploadIcon, ImageIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react"
 import { useOutletContext } from "react-router";
 import {
+  ACCEPTED_FILE_TYPES,
+  MAX_UPLOAD_SIZE,
   PROGRESS_INCREMENT,
   PROGRESS_INTERVAL_MS,
   REDIRECT_DELAY_MS,
@@ -15,6 +17,7 @@ const Upload = ({ onComplete = () => {} }: UploadProps) => {
     const [file,setFile]= useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
     const {isSignedIn} = useOutletContext<AuthContext>();
     const uploadIntervalRef = useRef<number | null>(null);
     const redirectTimeoutRef = useRef<number | null>(null);
@@ -37,10 +40,29 @@ const Upload = ({ onComplete = () => {} }: UploadProps) => {
       };
     }, []);
 
+    const validateFile = (nextFile: File): string | null => {
+      if (nextFile.size > MAX_UPLOAD_SIZE) {
+        return "File exceeds the 50MB upload limit.";
+      }
+
+      if (!ACCEPTED_FILE_TYPES.includes(nextFile.type as (typeof ACCEPTED_FILE_TYPES)[number])) {
+        return "Unsupported file type. Please upload a JPG or PNG image.";
+      }
+
+      return null;
+    };
+
     const processFile = (nextFile: File) => {
       if (!isSignedIn) return;
 
+      const validationError = validateFile(nextFile);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+
       clearUploadTimers();
+      setError(null);
       setFile(nextFile);
       setProgress(0);
       setIsDragging(false);
@@ -77,6 +99,12 @@ const Upload = ({ onComplete = () => {} }: UploadProps) => {
       const selectedFile = event.target.files?.[0];
       if (!selectedFile) return;
 
+      const validationError = validateFile(selectedFile);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+
       processFile(selectedFile);
     };
 
@@ -99,6 +127,12 @@ const Upload = ({ onComplete = () => {} }: UploadProps) => {
       setIsDragging(false);
       const droppedFile = event.dataTransfer.files?.[0];
       if (!droppedFile) return;
+
+      const validationError = validateFile(droppedFile);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
 
       processFile(droppedFile);
     };
@@ -131,6 +165,7 @@ const Upload = ({ onComplete = () => {} }: UploadProps) => {
      <p className="help">
         Maximum-file-size: 50MB
      </p>
+      {error && <p className="help">{error}</p>}
          </div>
          </div>
          </>

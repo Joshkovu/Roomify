@@ -3,7 +3,9 @@ import Navbar from "../../components/Navbar";
 import type { Route } from "./+types/home";
 import Button from "../../components/Button";
 import Upload from "../../components/Upload";
+import { useState } from "react";
 import { useNavigate } from "react-router";
+import { createProject } from "../../lib/puter.action";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
@@ -12,9 +14,31 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const handleUploadComplete = async (base64Data: string) => {
+  const [projects,setProjects] = useState<DesignItem[]>([]);
+
+  const handleUploadComplete = async (base64Image: string) => {
    const newId = Date.now().toString(); 
-   navigate(`/visualizer/${newId}`);
+   const name = `Residence ${newId}`;
+   const newItem = {
+    id: newId,
+    name,
+    sourceImage: base64Image,
+    renderedImage:undefined,
+    timestamp: Date.now(),
+   }
+   const saved = await createProject({item: newItem, visibility: "private"});
+   if(!saved){
+    alert("Failed to save project. Please try again.");
+    return false;
+   }
+   setProjects([saved,...projects]);
+   navigate(`/visualizer/${newId}`,{
+    state: {
+      initialImage:saved.sourceImage,
+      initialRendered: saved.renderedImage || null,
+      name: saved.name
+    }
+   });
    return true;
   };
   const navigate = useNavigate();
@@ -63,27 +87,29 @@ export default function Home() {
           </div>
         </div>
         <div className="projects-grid">
-          <div className="project-card group">
-            <div className="preview">
-              <img src="https://roomify-mlhuk267-dfwu1i.puter.site/projects/1770803585402/rendered.png" alt="project" />
-              <div className="badge">
-                <span>Community</span>
-              </div>
-            </div>
-            <div className="card-body">
-              <div>
-                <h3>Project Manhattan</h3>
-                <div className="meta">
-                  <Clock size={12}/>
-                  <span>{new Date().toLocaleDateString()}</span>
-                  <span>By Joash</span>
+          {projects.map((project) => (
+            <div className="project-card group" key={project.id}>
+              <div className="preview">
+                <img src={project.sourceImage ?? project.renderedImage ?? undefined} alt={project.name ?? "Project image"} />
+                <div className="badge">
+                  <span>Community</span>
                 </div>
               </div>
-              <div className="arrow">
-                <ArrowUpRight size={18}/>
+              <div className="card-body">
+                <div>
+                  <h3>{project.name}</h3>
+                  <div className="meta">
+                    <Clock size={12}/>
+                    <span>{new Date(project.timestamp).toLocaleDateString()}</span>
+                    <span>By Joash</span>
+                  </div>
+                </div>
+                <div className="arrow">
+                  <ArrowUpRight size={18}/>
+                </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

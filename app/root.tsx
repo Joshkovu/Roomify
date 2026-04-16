@@ -27,7 +27,7 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -44,7 +44,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 const DEFAULT_AUTH_STATE: AuthState = {
   isSignedIn: false,
-  username: null,
+  userName: null,
   userId: null,
 };
 
@@ -55,7 +55,7 @@ export default function App() {
      const user = await getCurrentUser();
       setAuthState({
         isSignedIn: !!user,
-        username: user?.username || null,
+        userName: user?.username || null,
         userId: user?.uuid || null
       });
       return !!user;

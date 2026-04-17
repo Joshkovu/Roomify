@@ -5,6 +5,7 @@ import { generate3DView } from "../../lib/ai.action";
 import { Box,X,Download, Share2, RefreshCcw } from "lucide-react";
 import Button from "../../components/Button";
 import { getProjectById, createProject } from "../../lib/puter.action";
+import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider";
 
 const visualizerId = () => {
   const {id }= useParams();
@@ -18,6 +19,59 @@ const visualizerId = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentImage, setCurrentImage] = useState<string|null>(null);
   const handleBack = ()=> navigate("/");
+  const handleExport = async () => {
+    if (!currentImage) return;
+
+    try {
+      let downloadUrl = currentImage;
+      let objectUrl: string | null = null;
+
+      if (!currentImage.startsWith("data:")) {
+        const response = await fetch(currentImage);
+        if (!response.ok) {
+          throw new Error("Failed to fetch image for export");
+        }
+
+        const blob = await response.blob();
+        objectUrl = URL.createObjectURL(blob);
+        downloadUrl = objectUrl;
+      }
+
+      const dataUrlMatch = currentImage.match(/^data:image\/([a-zA-Z0-9+.-]+);/);
+      const dataUrlExt = dataUrlMatch?.[1]?.replace("jpeg", "jpg");
+
+      let pathExt: string | undefined;
+      if (!currentImage.startsWith("data:")) {
+        try {
+          const parsedUrl = new URL(currentImage, window.location.origin);
+          const extMatch = parsedUrl.pathname.match(/\.([a-zA-Z0-9]+)$/);
+          pathExt = extMatch?.[1]?.toLowerCase();
+        } catch {
+          pathExt = undefined;
+        }
+      }
+
+      const extension = pathExt || dataUrlExt || "png";
+      const safeName = (project?.name || `roomify-${id || Date.now()}`)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `${safeName || "roomify-render"}.${extension}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    } catch (error) {
+      console.error("Failed to export rendered image:", error);
+    }
+  };
+
   const runGeneration = async (item: DesignItem) => {
     if(!id || !item.sourceImage) return ;
     try{
@@ -120,7 +174,7 @@ const visualizerId = () => {
           <div className="panel-actions">
             <Button
             size="sm"
-            onClick={()=>{}}
+            onClick={handleExport}
             className="export"
             disabled={!currentImage || isProcessing}
             >
@@ -163,7 +217,40 @@ const visualizerId = () => {
   )}
         </div>
         </div>
-        
+        <div className="panel compare">
+          <div className="panel-header">
+            <div className="panel-meta">
+              <p>Comparison</p>
+              <h2>Before vs After</h2>
+            </div>
+            <div className="hint">
+              Drag to compare
+            </div>
+            <div className="compare-stage">
+              {project?.sourceImage && currentImage ? (
+                <ReactCompareSlider 
+                defaultValue={50}
+                style = {{width:"100%", height:"auto"}}
+
+                itemOne ={
+                  <ReactCompareSliderImage src={project?.sourceImage} alt="Initial image" className="compare-img"/>
+                }
+                itemTwo={
+                  <ReactCompareSliderImage src={currentImage} alt="Rendered image" className="compare-img"/>
+                }
+                
+                />
+              ):(
+                <div className="compare-fallback">
+                  {project?.sourceImage && (
+                    <img src={project.sourceImage} alt="Initial image" className="compare-img" />
+                  ) }
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
        </section>
       </div>
    

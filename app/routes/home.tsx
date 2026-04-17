@@ -103,7 +103,7 @@ const isCreatingProjectRef = useRef(false);
           {projects.map((project) => (
             <div className="project-card group" key={project.id} onClick={() => navigate(`/visualizer/${project.id}`)}>
               <div className="preview">
-                <img src={project.sourceImage ?? project.renderedImage ?? undefined} alt={project.name ?? "Project image"} />
+                <img src={project.renderedImage ?? project.sourceImage ?? undefined} alt={project.name ?? "Project image"} />
                 <div className="badge">
                   <span>Community</span>
                 </div>

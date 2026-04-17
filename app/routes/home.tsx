@@ -3,9 +3,9 @@ import Navbar from "../../components/Navbar";
 import type { Route } from "./+types/home";
 import Button from "../../components/Button";
 import Upload from "../../components/Upload";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { createProject } from "../../lib/puter.action";
+import { createProject, getProjects  } from "../../lib/puter.action";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
@@ -15,8 +15,12 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   const [projects,setProjects] = useState<DesignItem[]>([]);
+const isCreatingProjectRef = useRef(false);
 
   const handleUploadComplete = async (base64Image: string) => {
+    try{
+    if(isCreatingProjectRef.current) return false;
+    isCreatingProjectRef.current = true;
    const newId = Date.now().toString(); 
    const name = `Residence ${newId}`;
    const newItem = {
@@ -40,7 +44,16 @@ export default function Home() {
     }
    });
    return true;
-  };
+  }finally{
+    isCreatingProjectRef.current = false;
+  }}
+  useEffect(() => {
+    const fetchProjects = async () => {
+      const items = await getProjects();
+      setProjects(items!);
+    };
+    fetchProjects();
+  }, []);
   const navigate = useNavigate();
   
 
@@ -88,9 +101,9 @@ export default function Home() {
         </div>
         <div className="projects-grid">
           {projects.map((project) => (
-            <div className="project-card group" key={project.id}>
+            <div className="project-card group" key={project.id} onClick={() => navigate(`/visualizer/${project.id}`)}>
               <div className="preview">
-                <img src={project.sourceImage ?? project.renderedImage ?? undefined} alt={project.name ?? "Project image"} />
+                <img src={project.renderedImage ?? project.sourceImage ?? undefined} alt={project.name ?? "Project image"} />
                 <div className="badge">
                   <span>Community</span>
                 </div>

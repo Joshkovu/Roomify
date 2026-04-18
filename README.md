@@ -69,7 +69,7 @@ components/
 
 ---
 
-## �� Getting Started
+## 🚀 Getting Started
 
 ### 1) Prerequisites
 
@@ -154,7 +154,7 @@ docker run -p 3000:3000 roomify
 ## 📌 Notes
 
 - `VITE_PUTER_WORKER_URL` is required for project save/list/get operations.
-- Supported upload types are JPEG/PNG, with max size set to 50MB.
+- Supported upload types and max file size are defined in `lib/constants.ts` (`ACCEPTED_FILE_TYPES`, `MAX_UPLOAD_SIZE` currently set to 50MB).
 
 ---
 

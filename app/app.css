@@ -245,6 +245,127 @@
         }
     }
 
+    .tutorial-overlay {
+        @apply fixed inset-0 z-70 flex items-center justify-center bg-black/55 backdrop-blur-sm p-4;
+    }
+
+    .tutorial-modal {
+        @apply w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-zinc-200 p-4 sm:p-6 md:p-8;
+    }
+
+    .tutorial-header {
+        @apply flex items-start justify-between gap-4;
+
+        .eyebrow {
+            @apply text-[10px] font-bold uppercase tracking-widest text-zinc-500;
+        }
+
+        h2 {
+            @apply text-2xl sm:text-3xl font-serif font-bold text-black;
+        }
+
+        .close {
+            @apply h-9 w-9 rounded-lg border border-zinc-200 text-zinc-500 flex items-center justify-center hover:bg-zinc-100 hover:text-black;
+
+            .icon {
+                @apply w-4 h-4;
+            }
+        }
+    }
+
+    .tutorial-progress {
+        @apply mt-4;
+
+        .bar {
+            @apply h-1.5 w-full rounded-full bg-zinc-100 overflow-hidden;
+
+            span {
+                @apply block h-full bg-primary transition-all duration-500 ease-in-out;
+            }
+        }
+
+        .dots {
+            @apply mt-3 flex items-center justify-center gap-2;
+
+            .dot {
+                @apply w-2.5 h-2.5 rounded-full bg-zinc-200 transition-all duration-300;
+
+                &.active {
+                    @apply bg-primary w-6;
+                }
+            }
+        }
+    }
+
+    .tutorial-carousel {
+        @apply mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50;
+    }
+
+    .tutorial-track {
+        @apply flex w-full;
+
+        &.is-reduced-motion {
+            transition: none !important;
+        }
+    }
+
+    .tutorial-slide-frame {
+        @apply min-w-full;
+    }
+
+    .tutorial-slide {
+        @apply p-5 sm:p-6 md:p-8 grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-8 items-stretch;
+
+        .visual {
+            @apply md:col-span-3 bg-white rounded-xl border border-zinc-200 p-5 sm:p-6;
+
+            .icon-wrap {
+                @apply w-12 h-12 rounded-lg bg-orange-100 text-primary flex items-center justify-center mb-4;
+
+                .slide-icon {
+                    @apply w-6 h-6;
+                }
+            }
+
+            h3 {
+                @apply text-xl sm:text-2xl font-serif font-bold text-black;
+            }
+
+            p {
+                @apply mt-2 text-sm sm:text-base text-zinc-600 leading-relaxed;
+            }
+        }
+
+        .highlight {
+            @apply md:col-span-2 bg-black text-white rounded-xl p-5 sm:p-6 flex flex-col justify-end;
+
+            span {
+                @apply text-[10px] uppercase tracking-widest text-zinc-400 font-bold;
+            }
+
+            p {
+                @apply mt-2 text-sm sm:text-base leading-relaxed;
+            }
+        }
+    }
+
+    .tutorial-controls {
+        @apply mt-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3;
+
+        .skip {
+            @apply text-zinc-500 hover:text-black;
+        }
+
+        .nav {
+            @apply flex gap-2;
+
+            .next,
+            .complete {
+                @apply bg-primary text-white hover:bg-orange-600;
+            }
+        }
+    }
+
     .upload {
         @apply w-full;
 

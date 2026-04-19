@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, Clock, Layers } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Clock, Layers, Share2, Sparkles, UploadCloud, WandSparkles } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import type { Route } from "./+types/home";
 import Button from "../../components/Button";
@@ -6,6 +6,9 @@ import Upload from "../../components/Upload";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { createProject, getProjects  } from "../../lib/puter.action";
+import TutorialCarousel from "../../components/tutorial/TutorialCarousel";
+import type { TutorialSlideData } from "../../components/tutorial/types";
+import { ONBOARDING_COMPLETED_KEY } from "../../lib/constants";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
@@ -15,7 +18,38 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   const [projects,setProjects] = useState<DesignItem[]>([]);
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
 const isCreatingProjectRef = useRef(false);
+  const tutorialSlides: TutorialSlideData[] = [
+    {
+      id: "welcome",
+      title: "Welcome to Roomify",
+      description: "Turn static floor plans into photorealistic top-down renders in minutes.",
+      icon: <Sparkles className="slide-icon" />,
+      highlight: "Tip: Start with a clean PNG/JPG for best visual output.",
+    },
+    {
+      id: "upload",
+      title: "Upload Your Blueprint",
+      description: "Use the upload panel to drop your plan and create a new project instantly.",
+      icon: <UploadCloud className="slide-icon" />,
+      highlight: "Supports high-quality PNG and JPG plans up to 50MB.",
+    },
+    {
+      id: "generate",
+      title: "Generate Before vs After",
+      description: "Roomify runs AI rendering and gives you an interactive compare slider to inspect results.",
+      icon: <WandSparkles className="slide-icon" />,
+      highlight: "Drag the slider to validate geometry and material quality.",
+    },
+    {
+      id: "share",
+      title: "Share or Keep Private",
+      description: "Control visibility with one click. Share publicly, or unshare to return to private storage.",
+      icon: <Share2 className="slide-icon" />,
+      highlight: "You stay in control of visibility at all times.",
+    },
+  ];
 
   const handleUploadComplete = async (base64Image: string) => {
     try{
@@ -54,6 +88,14 @@ const isCreatingProjectRef = useRef(false);
     };
     fetchProjects();
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hasCompletedOnboarding = window.localStorage.getItem(ONBOARDING_COMPLETED_KEY) === "true";
+    if (!hasCompletedOnboarding) {
+      setIsTutorialOpen(true);
+    }
+  }, []);
   const navigate = useNavigate();
   
 
@@ -73,7 +115,7 @@ const isCreatingProjectRef = useRef(false);
     
     <div className="actions">
       <a href="#upload" className="cta">Start building <ArrowRight className="icon" /></a>
-      <Button variant="outline" size="lg" className="demo">
+      <Button variant="outline" size="lg" className="demo" onClick={() => setIsTutorialOpen(true)}>
         Watch Demo
       </Button>
     </div>
@@ -126,6 +168,12 @@ const isCreatingProjectRef = useRef(false);
         </div>
       </div>
     </section>
+    <TutorialCarousel
+      isOpen={isTutorialOpen}
+      slides={tutorialSlides}
+      storageKey={ONBOARDING_COMPLETED_KEY}
+      onClose={() => setIsTutorialOpen(false)}
+    />
     </div>
   );
 }

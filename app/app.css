@@ -191,6 +191,60 @@
         }
     }
 
+    .share-modal {
+        @apply fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4;
+
+        .panel {
+            @apply bg-white rounded-xl shadow-2xl max-w-xl w-full p-6 border border-zinc-200;
+
+            .head {
+                h3 {
+                    @apply text-xl font-serif font-bold text-black;
+                }
+
+                p {
+                    @apply text-zinc-600 text-sm mt-2;
+                }
+            }
+
+            .share-link-row {
+                @apply mt-5 flex flex-col sm:flex-row gap-3;
+
+                .url-chip {
+                    @apply flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 flex items-center gap-2 min-w-0;
+
+                    .icon {
+                        @apply w-4 h-4 text-zinc-500 shrink-0;
+                    }
+
+                    span {
+                        @apply text-xs text-zinc-700 truncate;
+                    }
+                }
+            }
+
+            .status {
+                @apply mt-3 text-xs font-medium text-zinc-600;
+            }
+
+            .actions {
+                @apply mt-5 flex flex-col sm:flex-row gap-2;
+
+                .confirm {
+                    @apply bg-primary hover:bg-orange-600 text-white;
+                }
+
+                .danger {
+                    @apply border-red-200 text-red-600 hover:bg-red-50;
+                }
+
+                .close {
+                    @apply text-zinc-500 hover:bg-zinc-100;
+                }
+            }
+        }
+    }
+
     .upload {
         @apply w-full;
 
@@ -391,17 +445,27 @@
                 }
 
                 .compare-stage {
-                    @apply relative bg-zinc-100 overflow-hidden;
+                    @apply relative bg-zinc-100 overflow-hidden w-full;
 
-                    max-height: 70vh;
+                    min-height: clamp(16rem, 58vw, 38rem);
+                }
+
+                .compare-slider {
+                    @apply w-full h-full;
                 }
 
                 .compare-fallback {
-                    @apply flex items-center justify-center;
+                    @apply flex items-center justify-center w-full h-full;
                 }
 
                 .compare-img {
-                    @apply w-full h-auto object-contain;
+                    @apply w-full h-full object-contain;
+                }
+
+                @media (max-width: 640px) {
+                    .compare-stage {
+                        min-height: 15rem;
+                    }
                 }
             }
         }

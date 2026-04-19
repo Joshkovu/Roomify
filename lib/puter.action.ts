@@ -117,3 +117,45 @@ export const getProjectById = async ({ id }: { id: string }) => {
         return null;
     }
 };
+
+const mutateProjectShareState = async ({
+    id,
+    action,
+}: {
+    id: string;
+    action: "share" | "unshare";
+}) => {
+    if (!PUTER_WORKER_URL) {
+        console.warn(`Missing VITE_PUTER_WORKER_URL; cannot ${action} project.`);
+        return null;
+    }
+
+    try {
+        const response = await puter.workers.exec(
+            `${PUTER_WORKER_URL}/api/projects/${action}`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id }),
+            },
+        );
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            console.error(`Failed to ${action} project:`, response.status, errorBody || response.statusText);
+            return null;
+        }
+
+        const data = (await response.json()) as { project?: DesignItem | null };
+        return data?.project ?? null;
+    } catch (error) {
+        console.error(`Failed to ${action} project:`, error);
+        return null;
+    }
+};
+
+export const shareProject = async ({ id }: { id: string }) =>
+    mutateProjectShareState({ id, action: "share" });
+
+export const unshareProject = async ({ id }: { id: string }) =>
+    mutateProjectShareState({ id, action: "unshare" });

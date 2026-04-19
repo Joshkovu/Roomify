@@ -2,9 +2,9 @@
 import {  useNavigate, useOutletContext, useParams } from "react-router"
 import { useEffect, useRef, useState } from "react";
 import { generate3DView } from "../../lib/ai.action";
-import { Box,X,Download, Share2, RefreshCcw } from "lucide-react";
+import { Box,X,Download, Share2, RefreshCcw, Link2 } from "lucide-react";
 import Button from "../../components/Button";
-import { getProjectById, createProject } from "../../lib/puter.action";
+import { getProjectById, createProject, shareProject, unshareProject } from "../../lib/puter.action";
 import { ReactCompareSlider, ReactCompareSliderImage } from "react-compare-slider";
 
 const visualizerId = () => {
@@ -18,7 +18,25 @@ const visualizerId = () => {
   const hasInitialGenerated = useRef(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentImage, setCurrentImage] = useState<string|null>(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isShareActionLoading, setIsShareActionLoading] = useState(false);
+  const [shareStatusText, setShareStatusText] = useState<string | null>(null);
   const handleBack = ()=> navigate("/");
+  const shareUrl = typeof window !== "undefined" && id
+    ? `${window.location.origin}/visualizer/${id}`
+    : "";
+
+  const handleCopyShareLink = async () => {
+    if (!shareUrl) return;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareStatusText("Share link copied to clipboard.");
+    } catch (error) {
+      console.error("Failed to copy share link:", error);
+      setShareStatusText("Could not copy link. Please copy it manually.");
+    }
+  };
   const handleExport = async () => {
     if (!currentImage) return;
 
@@ -100,6 +118,36 @@ const visualizerId = () => {
       setIsProcessing(false);
     }
   }
+
+  const handleShareAction = async (action: ShareAction) => {
+    if (!project?.id || isShareActionLoading) return;
+
+    try {
+      setIsShareActionLoading(true);
+      setShareStatusText(action === "share" ? "Sharing project..." : "Unsharing project...");
+
+      const nextProject = action === "share"
+        ? await shareProject({ id: project.id })
+        : await unshareProject({ id: project.id });
+
+      if (!nextProject) {
+        setShareStatusText(action === "share"
+          ? "Failed to share project. Please try again."
+          : "Failed to unshare project. Please try again.");
+        return;
+      }
+
+      setProject(nextProject);
+      setShareStatusText(action === "share"
+        ? "Project is now shared publicly."
+        : "Project is now private.");
+    } catch (error) {
+      console.error("Failed to update sharing:", error);
+      setShareStatusText("Something went wrong while updating sharing.");
+    } finally {
+      setIsShareActionLoading(false);
+    }
+  };
    useEffect(() => {
     let isMounted = true;
 
@@ -168,7 +216,7 @@ const visualizerId = () => {
   <div className="panel-header">
           <div className="panel-meta">
             <p>Project</p>
-            <h2>{project?.name || "Residence ${id}"}</h2>
+            <h2>{project?.name || `Residence ${id}`}</h2>
             <p className="note">Created by You</p>
           </div>
           <div className="panel-actions">
@@ -184,12 +232,15 @@ const visualizerId = () => {
             </Button>
              <Button
             size="sm"
-            onClick={()=>{}}
+            onClick={() => {
+              setShareStatusText(null);
+              setIsShareModalOpen(true);
+            }}
             className="share"
           
             >
               <Share2 className="w-4 h-4 mr-2"/>
-              Share
+              {project?.isPublic ? "Shared" : "Share"}
 
             </Button>
 
@@ -226,32 +277,93 @@ const visualizerId = () => {
             <div className="hint">
               Drag to compare
             </div>
-            <div className="compare-stage">
-              {project?.sourceImage && currentImage ? (
-                <ReactCompareSlider 
-                defaultValue={50}
-                style = {{width:"100%", height:"auto"}}
+          </div>
 
-                itemOne ={
+          <div className="compare-stage">
+            {project?.sourceImage && currentImage ? (
+              <ReactCompareSlider
+                className="compare-slider"
+                defaultValue={50}
+                itemOne={
                   <ReactCompareSliderImage src={project?.sourceImage} alt="Initial image" className="compare-img"/>
                 }
                 itemTwo={
                   <ReactCompareSliderImage src={currentImage} alt="Rendered image" className="compare-img"/>
                 }
-                
-                />
-              ):(
-                <div className="compare-fallback">
-                  {project?.sourceImage && (
-                    <img src={project.sourceImage} alt="Initial image" className="compare-img" />
-                  ) }
-                </div>
-              )}
-            </div>
+              />
+            ):(
+              <div className="compare-fallback">
+                {project?.sourceImage && (
+                  <img src={project.sourceImage} alt="Initial image" className="compare-img" />
+                ) }
+              </div>
+            )}
           </div>
 
         </div>
        </section>
+
+       {isShareModalOpen && (
+        <div className="share-modal" role="dialog" aria-modal="true" aria-label="Share project">
+          <div className="panel">
+            <div className="head">
+              <h3>{project?.isPublic ? "Project is public" : "Share this project"}</h3>
+              <p>
+                {project?.isPublic
+                  ? "Anyone with this link can view this project."
+                  : "Move this project from private storage to public storage so it can be shared."}
+              </p>
+            </div>
+
+            <div className="share-link-row">
+              <div className="url-chip">
+                <Link2 className="icon" />
+                <span>{shareUrl || "Link unavailable"}</span>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCopyShareLink}
+                disabled={!shareUrl}
+              >
+                Copy link
+              </Button>
+            </div>
+
+            {shareStatusText && <p className="status">{shareStatusText}</p>}
+
+            <div className="actions">
+              {!project?.isPublic ? (
+                <Button
+                  className="confirm"
+                  onClick={() => void handleShareAction("share")}
+                  disabled={isShareActionLoading || !project?.id}
+                >
+                  {isShareActionLoading ? "Sharing..." : "Share now"}
+                </Button>
+              ) : (
+                <Button
+                  className="danger"
+                  variant="outline"
+                  onClick={() => void handleShareAction("unshare")}
+                  disabled={isShareActionLoading || !project?.id}
+                >
+                  {isShareActionLoading ? "Unsharing..." : "Unshare"}
+                </Button>
+              )}
+
+              <Button
+                variant="ghost"
+                className="close"
+                onClick={() => setIsShareModalOpen(false)}
+                disabled={isShareActionLoading}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+       )}
       </div>
    
   )

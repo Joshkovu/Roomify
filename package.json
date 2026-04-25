@@ -6,13 +6,15 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "deploy": "pnpm run build && wrangler deploy",
+    "preview": "pnpm run build && wrangler dev",
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
     "@heyputer/puter.js": "^2.2.15",
     "@react-router/node": "7.14.0",
     "@react-router/serve": "7.14.0",
-    "isbot": "^5.1.36",
     "lucide-react": "^1.8.0",
     "react": "^19.2.4",
     "react-compare-slider": "^4.0.0",
@@ -20,13 +22,16 @@
     "react-router": "7.14.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.33.2",
     "@react-router/dev": "7.14.0",
     "@tailwindcss/vite": "^4.2.2",
     "@types/node": "^22",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "isbot": "^5.1.38",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
-    "vite": "^8.0.3"
+    "vite": "^8.0.3",
+    "wrangler": "^4.85.0"
   }
 }
